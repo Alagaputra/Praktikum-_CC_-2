@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Inventory - High Performance Hardware</title>
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg); 
+            color: #e0e0e0; 
+            margin: 0; 
+            padding: 40px; 
+        }
+        .container { max-width: 900px; margin: auto; }
+        
+        /* Header & Identity */
+        .header { margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        .identity-box { 
+            background: var(--card-bg); 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 1px solid #333;
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+        .identity-box span { color: var(--primary); font-weight: bold; }
+
+        /* Styling Tabel */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        th { 
+            background-color: var(--primary); 
+            color: #000; 
+            padding: 15px; 
+            text-align: left; 
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        td { 
+            padding: 15px; 
+            border-bottom: 1px solid #333; 
+            font-size: 0.95rem;
+        }
+        tr:hover { background-color: #252525; }
+        
+        .stok-badge {
+            background: #333;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Katalog Gadget & Teknologi</h1>
+        </div>
+
+        <div class="identity-box">
+            Praktikan: <span id="nama">Loading...</span> | NIM: <span id="nim">Loading...</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama Gadget</th>
+                    <th>Kategori</th>
+                    <th>Spesifikasi</th>
+                    <th>Stok</th>
+                </tr>
+            </thead>
+            <tbody id="tabel-katalog">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Mengambil data dari Backend Flask
+        fetch('/api/katalog')
+            .then(res => {
+                if (!res.ok) throw new Error("Gagal terhubung ke Backend");
+                return res.json();
+            })
+            .then(data => {
+                // Set Identitas
+                document.getElementById('nama').innerText = data.nama;
+                document.getElementById('nim').innerText = data.nim;
+                
+                // Isi Tabel
+                const tableBody = document.getElementById('tabel-katalog');
+                let rows = '';
+                
+                data.katalog.forEach(item => {
+                    rows += `
+                        <tr>
+                            <td><strong>${item.nama}</strong></td>
+                            <td>${item.kategori}</td>
+                            <td>${item.spek}</td>
+                            <td><span class="stok-badge">${item.stok}</span></td>
+                        </tr>
+                    `;
+                });
+                tableBody.innerHTML = rows;
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('tabel-katalog').innerHTML = 
+                    `<tr><td colspan="4" style="text-align:center; color:red;">Gagal memuat data. Pastikan Backend sudah jalan!</td></tr>`;
+            });
+    </script>
+</body>
+</html>
